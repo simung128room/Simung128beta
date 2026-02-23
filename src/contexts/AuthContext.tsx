@@ -22,11 +22,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const parsed = JSON.parse(savedUser);
         try {
           const res = await fetch(`/api/auth/me?id=${parsed.id}`);
-          if (res.ok) {
+          const contentType = res.headers.get("content-type");
+          
+          if (res.ok && contentType && contentType.includes("application/json")) {
             const userData = await res.json();
             setUser(userData);
             localStorage.setItem('workout-user', JSON.stringify(userData));
           } else {
+            console.warn("Auth check failed or returned non-JSON. Logging out.");
             logout();
           }
         } catch (err) {

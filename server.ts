@@ -33,6 +33,18 @@ async function startServer() {
     );
   `);
 
+  // Migration: Add isBanned if it doesn't exist (for existing databases)
+  try {
+    db.prepare("SELECT isBanned FROM users LIMIT 1").get();
+  } catch (e) {
+    console.log("Migrating database: adding isBanned column to users table");
+    try {
+      db.exec("ALTER TABLE users ADD COLUMN isBanned INTEGER DEFAULT 0");
+    } catch (alterError) {
+      console.error("Migration failed", alterError);
+    }
+  }
+
   // Seed Admin
   const adminUsername = "ooD7822429";
   const existingAdmin = db.prepare("SELECT * FROM users WHERE username = ?").get(adminUsername);
