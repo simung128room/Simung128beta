@@ -16,53 +16,61 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('workout-user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    setIsLoading(false);
+    const initAuth = async () => {
+      const savedUser = localStorage.getItem('workout-user');
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        try {
+          const res = await fetch(`/api/auth/me?id=${parsed.id}`);
+          if (res.ok) {
+            const userData = await res.json();
+            setUser(userData);
+            localStorage.setItem('workout-user', JSON.stringify(userData));
+          } else {
+            logout();
+          }
+        } catch (err) {
+          console.error('Auth verification failed', err);
+          setUser(parsed); // Fallback to local if server is down
+        }
+      }
+      setIsLoading(false);
+    };
+    initAuth();
   }, []);
 
-  const login = async (email: string, _password: string) => {
-    // Simple mock login
-    const users = JSON.parse(localStorage.getItem('workout-users') || '[]');
-    
-    // Check for hardcoded admin
-    if (email === 'admin@airse.ai' || email === 'ooD7822429') {
-      const adminData = { id: 'admin-id', username: 'ooD7822429', email: 'admin@airse.ai', isAdmin: true };
-      setUser(adminData);
-      localStorage.setItem('workout-user', JSON.stringify(adminData));
-      return;
+  const login = async (email: string, password: string) => {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || 'Login failed');
     }
 
-    const foundUser = users.find((u: any) => u.email === email || u.username === email);
-    
-    if (foundUser) {
-      const userData = { id: foundUser.id, username: foundUser.username, email: foundUser.email, isAdmin: foundUser.username === 'ooD7822429' };
-      setUser(userData);
-      localStorage.setItem('workout-user', JSON.stringify(userData));
-    } else {
-      throw new Error('User not found');
-    }
+    const userData = await res.json();
+    setUser(userData);
+    localStorage.setItem('workout-user', JSON.stringify(userData));
   };
 
-  const register = async (username: string, email: string, _password: string) => {
-    const users = JSON.parse(localStorage.getItem('workout-users') || '[]');
-    if (users.some((u: any) => u.email === email)) {
-      throw new Error('User already exists');
+  const register = async (username: string, email: string, password: string) => {
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, email, password }),
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || 'Registration failed');
     }
 
-    const newUser = {
-      id: Math.random().toString(36).substr(2, 9),
-      username,
-      email,
-    };
-
-    users.push(newUser);
-    localStorage.setItem('workout-users', JSON.stringify(users));
-    
-    setUser(newUser);
-    localStorage.setItem('workout-user', JSON.stringify(newUser));
+    const userData = await res.json();
+    setUser(userData);
+    localStorage.setItem('workout-user', JSON.stringify(userData));
   };
 
   const logout = () => {

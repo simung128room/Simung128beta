@@ -38,7 +38,12 @@ export const SetItem: React.FC<SetItemProps> = ({ set, index, onUpdate, onDelete
             >
               <Minus size={14} />
             </button>
-            <span className="flex-1 text-center font-mono font-bold text-lg">{set.weight}</span>
+            <input
+              type="number"
+              value={set.weight}
+              onChange={(e) => onUpdate({ weight: parseFloat(e.target.value) || 0 })}
+              className="flex-1 text-center font-mono font-bold text-lg bg-transparent border-none focus:ring-0 w-12"
+            />
             <button
               onClick={() => adjustWeight(2.5)}
               className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-700 active:scale-90 transition-transform"
@@ -58,7 +63,12 @@ export const SetItem: React.FC<SetItemProps> = ({ set, index, onUpdate, onDelete
             >
               <Minus size={14} />
             </button>
-            <span className="flex-1 text-center font-mono font-bold text-lg">{set.reps}</span>
+            <input
+              type="number"
+              value={set.reps}
+              onChange={(e) => onUpdate({ reps: parseInt(e.target.value) || 0 })}
+              className="flex-1 text-center font-mono font-bold text-lg bg-transparent border-none focus:ring-0 w-12"
+            />
             <button
               onClick={() => adjustReps(1)}
               className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-700 active:scale-90 transition-transform"

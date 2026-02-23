@@ -19,7 +19,8 @@ async function startServer() {
       username TEXT UNIQUE,
       email TEXT UNIQUE,
       password TEXT,
-      isAdmin INTEGER DEFAULT 0
+      isAdmin INTEGER DEFAULT 0,
+      isBanned INTEGER DEFAULT 0
     );
     CREATE TABLE IF NOT EXISTS quests (
       id TEXT PRIMARY KEY,
@@ -41,6 +42,55 @@ async function startServer() {
   }
 
   app.use(express.json());
+
+  // Auth Routes
+  app.post("/api/auth/register", (req, res) => {
+    const { username, email, password } = req.body;
+    try {
+      const id = Math.random().toString(36).substr(2, 9);
+      db.prepare("INSERT INTO users (id, username, email, password) VALUES (?, ?, ?, ?)")
+        .run(id, username, email, password);
+      res.json({ id, username, email, isAdmin: false, isBanned: false });
+    } catch (err: any) {
+      res.status(400).json({ error: "User already exists or invalid data" });
+    }
+  });
+
+  app.post("/api/auth/login", (req, res) => {
+    const { email, password } = req.body;
+    const user = db.prepare("SELECT * FROM users WHERE email = ? OR username = ?").get(email, email) as any;
+    
+    if (!user || user.password !== password) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    if (user.isBanned) {
+      return res.status(403).json({ error: "Your account has been banned by the System." });
+    }
+
+    res.json({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      isAdmin: !!user.isAdmin,
+      isBanned: !!user.isBanned
+    });
+  });
+
+  app.get("/api/auth/me", (req, res) => {
+    const userId = req.query.id;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    const user = db.prepare("SELECT id, username, email, isAdmin, isBanned FROM users WHERE id = ?").get(userId) as any;
+    if (!user) return res.status(404).json({ error: "User not found" });
+    if (user.isBanned) return res.status(403).json({ error: "Banned" });
+    res.json({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      isAdmin: !!user.isAdmin,
+      isBanned: !!user.isBanned
+    });
+  });
 
   // API Routes
   app.get("/api/quests", (req, res) => {
@@ -66,6 +116,26 @@ async function startServer() {
     }
     db.prepare("DELETE FROM quests WHERE id = ?").run(req.params.id);
     res.json({ success: true });
+  });
+
+  // God-level Admin Routes
+  app.get("/api/admin/users", (req, res) => {
+    const { username } = req.query;
+    if (username !== adminUsername) return res.status(403).json({ error: "Unauthorized" });
+    const users = db.prepare("SELECT id, username, email, isAdmin, isBanned FROM users").all();
+    res.json(users);
+  });
+
+  app.post("/api/admin/users/:id/toggle-ban", (req, res) => {
+    const { username } = req.body;
+    if (username !== adminUsername) return res.status(403).json({ error: "Unauthorized" });
+    const user = db.prepare("SELECT * FROM users WHERE id = ?").get(req.params.id) as any;
+    if (!user) return res.status(404).json({ error: "User not found" });
+    if (user.username === adminUsername) return res.status(400).json({ error: "Cannot ban admin" });
+    
+    const newBanStatus = user.isBanned ? 0 : 1;
+    db.prepare("UPDATE users SET isBanned = ? WHERE id = ?").run(newBanStatus, req.params.id);
+    res.json({ success: true, isBanned: !!newBanStatus });
   });
 
   // Vite middleware for development

@@ -48,11 +48,30 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({ exercise, onUpdate, on
       <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-800/30">
         <input
           type="text"
+          list="exercise-suggestions"
           value={exercise.name}
           onChange={(e) => onUpdate({ name: e.target.value })}
           placeholder={t.exerciseName}
           className="bg-transparent border-none focus:ring-0 text-lg font-bold text-white placeholder:text-slate-600 w-full"
         />
+        <datalist id="exercise-suggestions">
+          <option value="Bench Press" />
+          <option value="Squat" />
+          <option value="Deadlift" />
+          <option value="Overhead Press" />
+          <option value="Barbell Row" />
+          <option value="Pull Ups" />
+          <option value="Push Ups" />
+          <option value="Dips" />
+          <option value="Bicep Curls" />
+          <option value="Tricep Extensions" />
+          <option value="Leg Press" />
+          <option value="Leg Curls" />
+          <option value="Leg Extensions" />
+          <option value="Lat Pulldown" />
+          <option value="Face Pulls" />
+          <option value="Plank" />
+        </datalist>
         <div className="flex items-center gap-2">
           <button
             onClick={onQuickAdd}
