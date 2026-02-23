@@ -35,8 +35,13 @@ export const AIAnalysis: React.FC = () => {
 
     try {
       const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        throw new Error("System Key Missing. Contact the Great Will.");
+      
+      if (!apiKey || apiKey.trim() === "") {
+        throw new Error("System Key Missing. Please set GEMINI_API_KEY.");
+      }
+
+      if (apiKey.startsWith("sk-")) {
+        throw new Error("INVALID KEY TYPE: You are using an OpenAI key. The System requires a Gemini API Key (starts with 'AIza'). Get one at aistudio.google.com");
       }
 
       const ai = new GoogleGenAI({ apiKey });
