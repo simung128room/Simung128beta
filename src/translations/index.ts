@@ -94,6 +94,7 @@ export const translations: Record<Language, TranslationSchema> = {
       "Level 3 (Professional): Barbells, Weight Plates, Squat Rack, Cable Machines."
     ],
     guideQuote: '"The only way to level up is through consistent effort."',
+    searchExercises: 'Search exercises...',
   },
   TH: {
     title: 'ตัวติดตามการออกกำลังกาย',
@@ -188,6 +189,7 @@ export const translations: Record<Language, TranslationSchema> = {
       "ระดับ 3 (มืออาชีพ): บาร์เบล, แผ่นน้ำหนัก, แร็คสควอท, เครื่องเคเบิล"
     ],
     guideQuote: '"หนทางเดียวที่จะเลเวลอัปได้ คือความพยายามที่สม่ำเสมอ"',
+    searchExercises: 'ค้นหาท่าออกกำลังกาย...',
   },
   JP: {
     title: 'ワークアウトトラッカー',
@@ -282,5 +284,6 @@ export const translations: Record<Language, TranslationSchema> = {
       "レベル3（プロフェッショナル）：バーベル、プレート、スクワットラック、ケーブルマシン。"
     ],
     guideQuote: '「レベルアップする唯一の方法は、継続的な努力である」',
+    searchExercises: '種目を検索...',
   },
 };

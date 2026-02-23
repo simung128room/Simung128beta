@@ -72,6 +72,19 @@ function WorkoutApp() {
   }, [stats]);
 
   const [activeSession, setActiveSession] = useState<WorkoutSession | null>(null);
+  const [exerciseSearch, setExerciseSearch] = useState('');
+
+  const previousExerciseNames = React.useMemo(() => {
+    const names = new Set<string>();
+    sessions.forEach(s => s.exercises.forEach(ex => {
+      if (ex.name) names.add(ex.name);
+    }));
+    // Default suggestions if history is empty
+    if (names.size === 0) {
+      ['Bench Press', 'Squat', 'Deadlift', 'Overhead Press', 'Barbell Row', 'Pull Ups', 'Push Ups', 'Dips'].forEach(n => names.add(n));
+    }
+    return Array.from(names).sort();
+  }, [sessions]);
 
   if (isLoading) {
     return (
@@ -92,6 +105,7 @@ function WorkoutApp() {
       exercises: [],
     };
     setActiveSession(newSession);
+    setExerciseSearch('');
     setView('active');
   };
 
@@ -384,17 +398,33 @@ function WorkoutApp() {
                 </button>
               </div>
 
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                  <HistoryIcon size={16} />
+                </div>
+                <input
+                  type="text"
+                  placeholder={t.searchExercises}
+                  value={exerciseSearch}
+                  onChange={(e) => setExerciseSearch(e.target.value)}
+                  className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl py-3 pl-12 pr-5 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                />
+              </div>
+
               <div className="flex flex-col gap-6">
                 <AnimatePresence mode="popLayout">
-                  {activeSession.exercises.map((exercise) => (
-                    <WorkoutCard
-                      key={exercise.id}
-                      exercise={exercise}
-                      onUpdate={(updates) => updateExercise(exercise.id, updates)}
-                      onDelete={() => deleteExercise(exercise.id)}
-                      onQuickAdd={() => quickAddPrevious(exercise.id)}
-                    />
-                  ))}
+                  {activeSession.exercises
+                    .filter(ex => !exerciseSearch || ex.name.toLowerCase().includes(exerciseSearch.toLowerCase()))
+                    .map((exercise) => (
+                      <WorkoutCard
+                        key={exercise.id}
+                        exercise={exercise}
+                        onUpdate={(updates) => updateExercise(exercise.id, updates)}
+                        onDelete={() => deleteExercise(exercise.id)}
+                        onQuickAdd={() => quickAddPrevious(exercise.id)}
+                        suggestions={previousExerciseNames}
+                      />
+                    ))}
                 </AnimatePresence>
 
                 <button

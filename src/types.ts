@@ -130,4 +130,5 @@ export interface TranslationSchema {
   guideStrategyContent: string[];
   guideEquipmentContent: string[];
   guideQuote: string;
+  searchExercises: string;
 }
