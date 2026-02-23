@@ -47,6 +47,16 @@ export interface Quest {
   type: 'daily' | 'weekly' | 'achievement';
 }
 
+export interface LandAnalysis {
+  id: string;
+  timestamp: string;
+  location: string;
+  soilType: string;
+  structure: string;
+  recommendation: string;
+  manaDensity: string;
+}
+
 export interface TranslationSchema {
   title: string;
   dashboard: string;
@@ -90,4 +100,12 @@ export interface TranslationSchema {
   questTitle: string;
   questDesc: string;
   reward: string;
+  landAnalysis: string;
+  analyze: string;
+  analyzing: string;
+  location: string;
+  soilType: string;
+  structure: string;
+  manaDensity: string;
+  recommendation: string;
 }

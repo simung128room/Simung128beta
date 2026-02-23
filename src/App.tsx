@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Save, X, History as HistoryIcon, LayoutDashboard, LogOut, Trophy, User as UserIcon, ShieldAlert } from 'lucide-react';
+import { Plus, Save, X, History as HistoryIcon, LayoutDashboard, LogOut, Trophy, User as UserIcon, ShieldAlert, Map } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -15,6 +15,7 @@ import { AuthScreen } from './components/AuthScreen';
 import { CharacterProfile } from './components/CharacterProfile';
 import { QuestWindow } from './components/QuestWindow';
 import { AdminPanel } from './components/AdminPanel';
+import { LandAnalysis } from './components/LandAnalysis';
 import { WorkoutSession, Exercise, CharacterStats, Quest } from './types';
 
 import { SystemDialogue } from './components/SystemDialogue';
@@ -22,7 +23,7 @@ import { SystemDialogue } from './components/SystemDialogue';
 function WorkoutApp() {
   const { t } = useLanguage();
   const { user, logout, isLoading } = useAuth();
-  const [view, setView] = useState<'dashboard' | 'active' | 'history' | 'character' | 'quests' | 'admin'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'active' | 'history' | 'character' | 'quests' | 'admin' | 'land'>('dashboard');
   const [sessions, setSessions] = useState<WorkoutSession[]>([]);
   const [showIntro, setShowIntro] = useState(() => {
     return !localStorage.getItem('workout-intro-seen');
@@ -447,6 +448,17 @@ function WorkoutApp() {
               <AdminPanel quests={quests} onCreateQuest={createQuest} onDeleteQuest={deleteQuest} />
             </motion.div>
           )}
+
+          {view === 'land' && (
+            <motion.div
+              key="land"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+            >
+              <LandAnalysis />
+            </motion.div>
+          )}
         </AnimatePresence>
       </main>
 
@@ -478,6 +490,15 @@ function WorkoutApp() {
         >
           <Trophy size={20} />
           <span className="text-[8px] font-black uppercase tracking-widest">{t.quests}</span>
+        </button>
+        <button
+          onClick={() => setView('land')}
+          className={`flex flex-col items-center gap-1 transition-all ${
+            view === 'land' ? 'text-blue-500' : 'text-slate-500'
+          }`}
+        >
+          <Map size={20} />
+          <span className="text-[8px] font-black uppercase tracking-widest">{t.landAnalysis}</span>
         </button>
         <button
           onClick={() => setView('history')}
